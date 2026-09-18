@@ -12,6 +12,7 @@ import {
   Calendar,
   ArrowRight,
   ClipboardList,
+  School,
 } from 'lucide-react';
 import { StatusBadge } from '../common/Badge';
 
@@ -23,6 +24,7 @@ export const DashboardAdmin: React.FC = () => {
     anggota,
     absensi,
     setCurrentMenu,
+    profilSekolah,
   } = useApp();
 
   // Helper date for today YYYY-MM-DD
@@ -68,6 +70,45 @@ export const DashboardAdmin: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* School Identity Header */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5 min-w-0">
+          {profilSekolah.logoUrl ? (
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-slate-800 p-1.5 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-xs">
+              <img
+                src={profilSekolah.logoUrl}
+                alt="Logo Sekolah"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+              <School className="w-6 h-6 sm:w-7 sm:h-7" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate">
+                {profilSekolah.namaSekolah}
+              </h2>
+              <span className="hidden md:inline px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[10px] font-bold border border-blue-200 dark:border-blue-800 shrink-0">
+                NPSN: {profilSekolah.npsn}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+              Tahun Ajaran {profilSekolah.tahunAjaran} • Semester {profilSekolah.semester} • {profilSekolah.alamat}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setCurrentMenu('pengaturan-sekolah')}
+          className="self-start sm:self-center px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors shrink-0"
+        >
+          Kelola Profil & Logo
+        </button>
+      </div>
+
       {/* Master Data Stats (Cards 1-4) */}
       <div>
         <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">

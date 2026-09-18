@@ -21,8 +21,26 @@ import { PenggunaView } from './components/views/PenggunaView';
 import { ProfilSekolahView } from './components/views/ProfilSekolahView';
 
 function AppContent() {
-  const { currentUser, currentMenu } = useApp();
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const { currentUser, currentMenu, isDarkMode, profilSekolah } = useApp();
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+
+  // Automatically adjust sidebar on screen resize
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // If not logged in, render the login view
   if (!currentUser) {
@@ -85,14 +103,25 @@ function AppContent() {
     }
   };
 
+  const cinematicBgClass = isDarkMode
+    ? `cinema-${profilSekolah.temaSinematik || 'midnight'}`
+    : 'cinema-light';
+
   return (
-    <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+    <div className={`min-h-screen flex ${cinematicBgClass} text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200`}>
       {/* Responsive Navigation Sidebar */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-[padding] duration-200 ease-in-out ${
+          isSidebarOpen ? 'lg:pl-64' : 'pl-0'
+        }`}
+      >
+        <Topbar
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+        />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto overflow-y-auto">
           {renderContent()}

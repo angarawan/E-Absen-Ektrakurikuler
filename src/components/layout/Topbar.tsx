@@ -14,9 +14,10 @@ import { UserRole } from '../../types';
 
 interface TopbarProps {
   onToggleSidebar: () => void;
+  isSidebarOpen?: boolean;
 }
 
-export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
+export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   const {
     currentUser,
     currentMenu,
@@ -131,13 +132,14 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleSidebar }) => {
       id="app-topbar"
       className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 h-16 flex items-center justify-between transition-colors"
     >
-      {/* Left: Mobile hamburger & page title */}
+      {/* Left: Hamburger menu toggle & page title */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           id="btn-toggle-sidebar"
           onClick={onToggleSidebar}
-          className="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 lg:hidden"
-          aria-label="Toggle menu"
+          className="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 transition-colors"
+          title={isSidebarOpen ? 'Sembunyikan menu navigasi' : 'Tampilkan menu navigasi'}
+          aria-label={isSidebarOpen ? 'Sembunyikan menu' : 'Tampilkan menu'}
         >
           <Menu className="w-5 h-5" />
         </button>

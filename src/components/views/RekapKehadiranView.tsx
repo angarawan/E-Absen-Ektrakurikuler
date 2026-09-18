@@ -3,12 +3,14 @@ import { useApp } from '../../context/AppContext';
 import { RekapItem } from '../../types';
 import {
   FileSpreadsheet,
+  FileText,
   Printer,
   Search,
   Filter,
   Award,
   Calendar,
   Percent,
+  Download,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -151,6 +153,50 @@ export const RekapKehadiranView: React.FC = () => {
     XLSX.writeFile(workbook, `Rekap_Absensi_Ekskul_${dateStr}.xlsx`);
   };
 
+  // Export to CSV function
+  const handleExportCSV = () => {
+    const headers = [
+      'No',
+      'NIS',
+      'Nama Siswa',
+      'Kelas',
+      'Ekstrakurikuler',
+      'Hadir',
+      'Izin',
+      'Sakit',
+      'Alpa',
+      'Total Pertemuan',
+      'Persentase Kehadiran (%)',
+    ];
+
+    const rows = filteredRekap.map((item, index) => [
+      index + 1,
+      `"${item.nis}"`,
+      `"${item.nama.replace(/"/g, '""')}"`,
+      `"${item.kelas.replace(/"/g, '""')}"`,
+      `"${item.ekskulNama.replace(/"/g, '""')}"`,
+      item.hadir,
+      item.izin,
+      item.sakit,
+      item.alpa,
+      item.totalPertemuan,
+      `"${item.persentase}%"`,
+    ]);
+
+    // UTF-8 BOM (\uFEFF) ensures Excel opens Indonesian characters without encoding issues
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `Rekap_Absensi_Ekskul_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Print function
   const handlePrint = () => {
     window.print();
@@ -195,33 +241,46 @@ export const RekapKehadiranView: React.FC = () => {
               className="text-xs sm:text-sm py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Semua Kelas</option>
-              {Array.from(new Set(siswa.map((s) => s.kelas))).map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
+              {Array.from(new Set(siswa.map((s) => s.kelas).filter(Boolean)))
+                .sort()
+                .map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
             </select>
 
-            {/* Export Excel Button (Requirement 17) */}
+            {/* Export Excel Button */}
             <button
               id="btn-export-excel"
               onClick={handleExportExcel}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors whitespace-nowrap"
               title="Unduh laporan dalam format Microsoft Excel (.xlsx)"
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Export Excel</span>
             </button>
 
+            {/* Export CSV Button */}
+            <button
+              id="btn-export-csv"
+              onClick={handleExportCSV}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-xs transition-colors whitespace-nowrap"
+              title="Unduh data laporan dalam format CSV (.csv)"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export CSV</span>
+            </button>
+
             {/* Print Button (Requirement 17) */}
             <button
               id="btn-print-rekap"
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs sm:text-sm shadow-xs transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs sm:text-sm shadow-xs transition-colors whitespace-nowrap"
               title="Cetak dokumen rekap kehadiran"
             >
               <Printer className="w-4 h-4" />
-              <span>Cetak / Print</span>
+              <span>Cetak</span>
             </button>
           </div>
         </div>
@@ -234,19 +293,33 @@ export const RekapKehadiranView: React.FC = () => {
         className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs print:p-0 print:border-none print:shadow-none print:bg-white print:text-black"
       >
         {/* Document Formal Header (KOP Surat Sekolah) */}
-        <div className="border-b-2 border-slate-900 dark:border-slate-100 pb-4 mb-6 text-center">
-          <h2 className="text-lg sm:text-xl font-black uppercase tracking-wide text-slate-900 dark:text-white print:text-black">
-            {profilSekolah.namaSekolah}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 print:text-slate-700 mt-0.5">
-            {profilSekolah.alamat} • NPSN: {profilSekolah.npsn}
-          </p>
-          <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 print:text-black font-semibold">
-            <span>LAPORAN REKAPITULASI KEHADIRAN EKSTRAKURIKULER</span>
-            <span>
-              Tahun Ajaran: {profilSekolah.tahunAjaran} ({profilSekolah.semester})
-            </span>
+        <div className="border-b-2 border-slate-900 dark:border-slate-100 pb-4 mb-6 flex items-center gap-4 sm:gap-6">
+          {profilSekolah.logoUrl && (
+            <div className="w-14 h-14 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center">
+              <img
+                src={profilSekolah.logoUrl}
+                alt="Logo Sekolah"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          )}
+          <div className="flex-1 text-center">
+            <h2 className="text-lg sm:text-xl font-black uppercase tracking-wide text-slate-900 dark:text-white print:text-black">
+              {profilSekolah.namaSekolah}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 print:text-slate-700 mt-0.5">
+              {profilSekolah.alamat} • NPSN: {profilSekolah.npsn}
+            </p>
+            <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 print:text-black font-semibold">
+              <span>LAPORAN REKAPITULASI KEHADIRAN EKSTRAKURIKULER</span>
+              <span>
+                Tahun Ajaran: {profilSekolah.tahunAjaran} ({profilSekolah.semester})
+              </span>
+            </div>
           </div>
+          {profilSekolah.logoUrl && (
+            <div className="w-14 sm:w-20 hidden sm:block shrink-0" />
+          )}
         </div>
 
         {/* Formula calculation reminder box (Requirement 12) */}

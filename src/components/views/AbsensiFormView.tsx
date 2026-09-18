@@ -237,8 +237,8 @@ export const AbsensiFormView: React.FC = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Kartu Sentuh</span>
+                <List className="w-3.5 h-3.5" />
+                <span>Daftar 1 Baris</span>
               </button>
               <button
                 type="button"
@@ -249,8 +249,8 @@ export const AbsensiFormView: React.FC = () => {
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
                 }`}
               >
-                <List className="w-3.5 h-3.5" />
-                <span>Tabel Ringkas</span>
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Tabel</span>
               </button>
             </div>
           </div>
@@ -367,25 +367,25 @@ export const AbsensiFormView: React.FC = () => {
 
       {/* Action Bar & Quick Status Pills */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Status Counts Summary */}
+        {/* Status Counts Summary & Legend */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="font-bold text-slate-700 dark:text-slate-300 mr-1">
-            Ringkasan:
+            Status:
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black">H</span>
             Hadir: {countHadir}
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-bold border border-sky-200 dark:border-sky-800 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-sky-500" />
-            Izin: {countIzin}
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
+          <span className="px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded bg-amber-500 text-white flex items-center justify-center text-[10px] font-black">S</span>
             Sakit: {countSakit}
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-800 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-rose-500" />
+          <span className="px-2 py-0.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-bold border border-sky-200 dark:border-sky-800 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded bg-sky-600 text-white flex items-center justify-center text-[10px] font-black">I</span>
+            Izin: {countIzin}
+          </span>
+          <span className="px-2 py-0.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-800 flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded bg-rose-600 text-white flex items-center justify-center text-[10px] font-black">A</span>
             Alpa: {countAlpa}
           </span>
         </div>
@@ -436,8 +436,8 @@ export const AbsensiFormView: React.FC = () => {
           </button>
         </div>
       ) : viewMode === 'card' ? (
-        /* MODE KARTU SENTUH (SANGAT SEDERHANA & RAMAH MOBILE) */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        /* MODE DAFTAR 1 BARIS (KOMPAK & MUAT 1 BARIS DENGAN NAMA SISWA) */
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
           {displayedRows.map((row, idx) => {
             const isHadir = row.status === 'HADIR';
             const isIzin = row.status === 'IZIN';
@@ -447,121 +447,126 @@ export const AbsensiFormView: React.FC = () => {
             return (
               <div
                 key={row.siswaId}
-                className={`p-4 rounded-2xl border transition-all ${
+                className={`p-2.5 sm:px-4 sm:py-2.5 transition-colors ${
                   isHadir
-                    ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
-                    : isIzin
-                    ? 'bg-sky-50/40 dark:bg-sky-950/20 border-sky-300 dark:border-sky-800'
+                    ? 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'
                     : isSakit
-                    ? 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800'
-                    : 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-300 dark:border-rose-800'
-                } shadow-xs`}
+                    ? 'bg-amber-50/40 dark:bg-amber-950/20'
+                    : isIzin
+                    ? 'bg-sky-50/40 dark:bg-sky-950/20'
+                    : 'bg-rose-50/40 dark:bg-rose-950/20'
+                }`}
               >
-                {/* Header Murid */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-slate-400">#{idx + 1}</span>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                {/* 1 BARIS: No & Nama Siswa di kiri, Tombol kecil H, S, I, A di kanan */}
+                <div className="flex items-center justify-between gap-2">
+                  {/* Kiri: Nomor, Nama Siswa, Kelas */}
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-xs font-bold text-slate-400 w-5 sm:w-6 text-right shrink-0">
+                      {idx + 1}.
+                    </span>
+                    <div className="min-w-0 flex-1 flex items-baseline gap-1.5 sm:gap-2">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                         {row.nama}
-                      </h4>
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium shrink-0">
+                        ({row.kelas})
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Kelas: <strong className="text-slate-700 dark:text-slate-300">{row.kelas}</strong> • NIS: {row.nis}
-                    </p>
                   </div>
 
-                  {/* Status Badge */}
-                  <span
-                    className={`px-2 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider ${
-                      isHadir
-                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-                        : isIzin
-                        ? 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300'
-                        : isSakit
-                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
-                        : 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
-                    }`}
-                  >
-                    {row.status}
-                  </span>
+                  {/* Kanan: Tombol kecil H, S, I, A + Field Keterangan */}
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                    {/* Tombol H (Hadir) */}
+                    <button
+                      type="button"
+                      id={`btn-hadir-${row.siswaId}`}
+                      onClick={() => handleStatusChange(row.siswaId, 'HADIR')}
+                      title="Hadir"
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                        isHadir
+                          ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-600/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40'
+                      }`}
+                    >
+                      H
+                    </button>
+
+                    {/* Tombol S (Sakit) */}
+                    <button
+                      type="button"
+                      id={`btn-sakit-${row.siswaId}`}
+                      onClick={() => handleStatusChange(row.siswaId, 'SAKIT')}
+                      title="Sakit"
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                        isSakit
+                          ? 'bg-amber-500 text-white shadow-xs ring-2 ring-amber-500/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/40'
+                      }`}
+                    >
+                      S
+                    </button>
+
+                    {/* Tombol I (Izin) */}
+                    <button
+                      type="button"
+                      id={`btn-izin-${row.siswaId}`}
+                      onClick={() => handleStatusChange(row.siswaId, 'IZIN')}
+                      title="Izin"
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                        isIzin
+                          ? 'bg-sky-600 text-white shadow-xs ring-2 ring-sky-600/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-sky-50 hover:text-sky-700 dark:hover:bg-sky-950/40'
+                      }`}
+                    >
+                      I
+                    </button>
+
+                    {/* Tombol A (Alpa) */}
+                    <button
+                      type="button"
+                      id={`btn-alpa-${row.siswaId}`}
+                      onClick={() => handleStatusChange(row.siswaId, 'ALPA')}
+                      title="Alpa / Tanpa Keterangan"
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                        isAlpa
+                          ? 'bg-rose-600 text-white shadow-xs ring-2 ring-rose-600/30'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40'
+                      }`}
+                    >
+                      A
+                    </button>
+
+                    {/* Input keterangan inline pada desktop/tablet */}
+                    <div className="hidden md:block ml-2 w-44 lg:w-56 shrink-0">
+                      <input
+                        type="text"
+                        value={row.keterangan}
+                        onChange={(e) => handleKeteranganChange(row.siswaId, e.target.value)}
+                        placeholder="Ket (opsional)..."
+                        className="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Big 4-Button Touch Grid */}
-                <div className="grid grid-cols-4 gap-1.5 mb-2.5">
-                  <button
-                    type="button"
-                    id={`btn-hadir-${row.siswaId}`}
-                    onClick={() => handleStatusChange(row.siswaId, 'HADIR')}
-                    className={`py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all ${
-                      isHadir
-                        ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-600/30'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 hover:text-emerald-700'
-                    }`}
-                  >
-                    <Check className="w-3.5 h-3.5 mb-0.5" />
-                    <span>HADIR</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    id={`btn-izin-${row.siswaId}`}
-                    onClick={() => handleStatusChange(row.siswaId, 'IZIN')}
-                    className={`py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all ${
-                      isIzin
-                        ? 'bg-sky-600 text-white shadow-sm ring-2 ring-sky-600/30'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-sky-50 hover:text-sky-700'
-                    }`}
-                  >
-                    <Info className="w-3.5 h-3.5 mb-0.5" />
-                    <span>IZIN</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    id={`btn-sakit-${row.siswaId}`}
-                    onClick={() => handleStatusChange(row.siswaId, 'SAKIT')}
-                    className={`py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all ${
-                      isSakit
-                        ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-600/30'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-amber-50 hover:text-amber-700'
-                    }`}
-                  >
-                    <span className="text-xs leading-none mb-0.5">🩹</span>
-                    <span>SAKIT</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    id={`btn-alpa-${row.siswaId}`}
-                    onClick={() => handleStatusChange(row.siswaId, 'ALPA')}
-                    className={`py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center transition-all ${
-                      isAlpa
-                        ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-600/30'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-700'
-                    }`}
-                  >
-                    <span className="text-xs leading-none mb-0.5">✕</span>
-                    <span>ALPA</span>
-                  </button>
-                </div>
-
-                {/* Keterangan input */}
-                <input
-                  type="text"
-                  value={row.keterangan}
-                  onChange={(e) => handleKeteranganChange(row.siswaId, e.target.value)}
-                  placeholder={
-                    isHadir
-                      ? 'Keterangan (opsional)...'
-                      : isIzin
-                      ? 'Contoh: Izin urusan keluarga'
-                      : isSakit
-                      ? 'Contoh: Sakit demam'
-                      : 'Alasan alpa...'
-                  }
-                  className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400"
-                />
+                {/* Input keterangan di mobile jika bukan HADIR atau jika sudah ada keterangan */}
+                {(!isHadir || row.keterangan) && (
+                  <div className="md:hidden mt-2 pl-7 pr-1">
+                    <input
+                      type="text"
+                      value={row.keterangan}
+                      onChange={(e) => handleKeteranganChange(row.siswaId, e.target.value)}
+                      placeholder={
+                        isSakit
+                          ? 'Alasan sakit (misal: demam, flu)...'
+                          : isIzin
+                          ? 'Alasan izin (misal: urusan keluarga)...'
+                          : 'Alasan alpa...'
+                      }
+                      className="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-slate-400"
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
@@ -573,92 +578,103 @@ export const AbsensiFormView: React.FC = () => {
             <table className="w-full text-left text-xs sm:text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 uppercase text-[11px] font-bold border-b border-slate-200 dark:border-slate-800">
                 <tr>
-                  <th className="px-4 py-3.5 w-12 text-center">No</th>
-                  <th className="px-4 py-3.5">Nama Siswa</th>
-                  <th className="px-4 py-3.5">Kelas</th>
-                  <th className="px-4 py-3.5 text-center">Pilih Status Kehadiran</th>
-                  <th className="px-4 py-3.5">Keterangan</th>
+                  <th className="px-3 sm:px-4 py-3 w-12 text-center">No</th>
+                  <th className="px-3 sm:px-4 py-3">Nama Siswa</th>
+                  <th className="px-3 sm:px-4 py-3">Kelas</th>
+                  <th className="px-3 sm:px-4 py-3 text-center">Status (H / S / I / A)</th>
+                  <th className="px-3 sm:px-4 py-3">Keterangan</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {displayedRows.map((row, idx) => (
-                  <tr
-                    key={row.siswaId}
-                    className="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-center text-slate-400 font-medium whitespace-nowrap">
-                      {idx + 1}
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
-                      <div>{row.nama}</div>
-                      <div className="text-[11px] text-slate-400">NIS: {row.nis}</div>
-                    </td>
-                    <td className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                      {row.kelas}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      <div className="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                        <button
-                          type="button"
-                          id={`table-btn-hadir-${row.siswaId}`}
-                          onClick={() => handleStatusChange(row.siswaId, 'HADIR')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                            row.status === 'HADIR'
-                              ? 'bg-emerald-600 text-white shadow-xs'
-                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                          }`}
-                        >
-                          HADIR
-                        </button>
-                        <button
-                          type="button"
-                          id={`table-btn-izin-${row.siswaId}`}
-                          onClick={() => handleStatusChange(row.siswaId, 'IZIN')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                            row.status === 'IZIN'
-                              ? 'bg-sky-600 text-white shadow-xs'
-                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                          }`}
-                        >
-                          IZIN
-                        </button>
-                        <button
-                          type="button"
-                          id={`table-btn-sakit-${row.siswaId}`}
-                          onClick={() => handleStatusChange(row.siswaId, 'SAKIT')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                            row.status === 'SAKIT'
-                              ? 'bg-amber-600 text-white shadow-xs'
-                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                          }`}
-                        >
-                          SAKIT
-                        </button>
-                        <button
-                          type="button"
-                          id={`table-btn-alpa-${row.siswaId}`}
-                          onClick={() => handleStatusChange(row.siswaId, 'ALPA')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                            row.status === 'ALPA'
-                              ? 'bg-rose-600 text-white shadow-xs'
-                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                          }`}
-                        >
-                          ALPA
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        value={row.keterangan}
-                        onChange={(e) => handleKeteranganChange(row.siswaId, e.target.value)}
-                        placeholder="Keterangan..."
-                        className="w-full min-w-[150px] px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {displayedRows.map((row, idx) => {
+                  const isHadir = row.status === 'HADIR';
+                  const isSakit = row.status === 'SAKIT';
+                  const isIzin = row.status === 'IZIN';
+                  const isAlpa = row.status === 'ALPA';
+
+                  return (
+                    <tr
+                      key={row.siswaId}
+                      className="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-colors"
+                    >
+                      <td className="px-3 sm:px-4 py-2.5 text-center text-slate-400 font-medium whitespace-nowrap">
+                        {idx + 1}
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
+                        <div>{row.nama}</div>
+                        <div className="text-[11px] text-slate-400 font-normal">NIS: {row.nis}</div>
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                        {row.kelas}
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
+                        <div className="inline-flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                          <button
+                            type="button"
+                            id={`table-btn-hadir-${row.siswaId}`}
+                            onClick={() => handleStatusChange(row.siswaId, 'HADIR')}
+                            title="Hadir"
+                            className={`w-7 h-7 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                              isHadir
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400'
+                            }`}
+                          >
+                            H
+                          </button>
+                          <button
+                            type="button"
+                            id={`table-btn-sakit-${row.siswaId}`}
+                            onClick={() => handleStatusChange(row.siswaId, 'SAKIT')}
+                            title="Sakit"
+                            className={`w-7 h-7 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                              isSakit
+                                ? 'bg-amber-500 text-white shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400'
+                            }`}
+                          >
+                            S
+                          </button>
+                          <button
+                            type="button"
+                            id={`table-btn-izin-${row.siswaId}`}
+                            onClick={() => handleStatusChange(row.siswaId, 'IZIN')}
+                            title="Izin"
+                            className={`w-7 h-7 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                              isIzin
+                                ? 'bg-sky-600 text-white shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-sky-700 dark:hover:text-sky-400'
+                            }`}
+                          >
+                            I
+                          </button>
+                          <button
+                            type="button"
+                            id={`table-btn-alpa-${row.siswaId}`}
+                            onClick={() => handleStatusChange(row.siswaId, 'ALPA')}
+                            title="Alpa"
+                            className={`w-7 h-7 rounded-lg text-xs font-black flex items-center justify-center transition-all ${
+                              isAlpa
+                                ? 'bg-rose-600 text-white shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-400'
+                            }`}
+                          >
+                            A
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5">
+                        <input
+                          type="text"
+                          value={row.keterangan}
+                          onChange={(e) => handleKeteranganChange(row.siswaId, e.target.value)}
+                          placeholder="Keterangan..."
+                          className="w-full min-w-[140px] px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

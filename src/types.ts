@@ -86,6 +86,7 @@ export interface ProfilSekolah {
   semester: 'Ganjil' | 'Genap';
   tahunAjaran: string;
   logoUrl?: string;
+  temaSinematik?: 'midnight' | 'emerald' | 'amber' | 'velvet' | 'obsidian';
 }
 
 export interface RekapItem {

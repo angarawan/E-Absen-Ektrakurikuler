@@ -67,7 +67,7 @@ export const SiswaView: React.FC = () => {
     nisn: '',
     nama: '',
     jenisKelamin: 'L',
-    kelas: kelas[0] || 'X-IPA 1',
+    kelas: '',
     noHp: '',
     status: 'Aktif',
   });
@@ -99,7 +99,7 @@ export const SiswaView: React.FC = () => {
       nisn: '',
       nama: '',
       jenisKelamin: 'L',
-      kelas: kelas[0] || 'X-IPA 1',
+      kelas: '',
       noHp: '',
       status: 'Aktif',
     });
@@ -264,11 +264,13 @@ export const SiswaView: React.FC = () => {
                 className="text-xs sm:text-sm py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Semua Kelas</option>
-                {kelas.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
+                {Array.from(new Set(siswa.map((s) => s.kelas).filter(Boolean)))
+                  .sort()
+                  .map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -519,19 +521,17 @@ export const SiswaView: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Kelas
+                Kelas <span className="text-rose-500">*</span>
               </label>
-              <select
+              <input
+                id="input-siswa-kelas"
+                type="text"
+                required
                 value={formData.kelas}
                 onChange={(e) => setFormData({ ...formData, kelas: e.target.value })}
+                placeholder="Isi kelas manual (misal: X-RPL 1, XII MIPA 2)"
                 className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              >
-                {kelas.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           </div>
 

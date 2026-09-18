@@ -1,4 +1,5 @@
 import { Siswa, Pembina, Ekstrakurikuler, Anggota, Jadwal, AbsensiRecord, User, ProfilSekolah } from '../types';
+import { PRESET_LOGOS } from './presetLogos';
 
 export const INITIAL_SEKOLAH: ProfilSekolah = {
   namaSekolah: 'SMA NEGERI 1 TELADAN NUSANTARA',
@@ -7,7 +8,9 @@ export const INITIAL_SEKOLAH: ProfilSekolah = {
   kepalaSekolah: 'Dr. H. Muhammad Arifin, M.Pd.',
   nipKepalaSekolah: '19700415 199512 1 002',
   semester: 'Ganjil',
-  tahunAjaran: '2024/2025'
+  tahunAjaran: '2024/2025',
+  logoUrl: PRESET_LOGOS[0].dataUrl,
+  temaSinematik: 'midnight',
 };
 
 export const INITIAL_KELAS: string[] = [

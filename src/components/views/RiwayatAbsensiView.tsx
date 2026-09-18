@@ -357,7 +357,7 @@ export const RiwayatAbsensiView: React.FC = () => {
                 Status Kehadiran
               </label>
               <div className="grid grid-cols-4 gap-2">
-                {(['HADIR', 'IZIN', 'SAKIT', 'ALPA'] as AttendanceStatus[]).map((st) => (
+                {(['HADIR', 'SAKIT', 'IZIN', 'ALPA'] as AttendanceStatus[]).map((st) => (
                   <button
                     key={st}
                     type="button"
@@ -366,15 +366,15 @@ export const RiwayatAbsensiView: React.FC = () => {
                       editStatus === st
                         ? st === 'HADIR'
                           ? 'bg-emerald-500 text-white border-emerald-600'
-                          : st === 'IZIN'
-                          ? 'bg-sky-500 text-white border-sky-600'
                           : st === 'SAKIT'
                           ? 'bg-amber-500 text-white border-amber-600'
+                          : st === 'IZIN'
+                          ? 'bg-sky-500 text-white border-sky-600'
                           : 'bg-rose-500 text-white border-rose-600'
                         : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
-                    {st}
+                    {st === 'HADIR' ? 'H (Hadir)' : st === 'SAKIT' ? 'S (Sakit)' : st === 'IZIN' ? 'I (Izin)' : 'A (Alpa)'}
                   </button>
                 ))}
               </div>

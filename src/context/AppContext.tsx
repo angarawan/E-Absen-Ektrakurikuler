@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   User,
   UserRole,
@@ -149,7 +149,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [jadwal, setJadwal] = useState<Jadwal[]>(() => loadStorage<Jadwal[]>('jadwal', INITIAL_JADWAL));
   const [absensi, setAbsensi] = useState<AbsensiRecord[]>(() => loadStorage<AbsensiRecord[]>('absensi', INITIAL_ABSENSI));
   const [users, setUsers] = useState<User[]>(() => loadStorage<User[]>('users', INITIAL_USERS));
-  const [kelas] = useState<string[]>(() => loadStorage<string[]>('kelas', INITIAL_KELAS));
+  const kelas = useMemo(() => {
+    return Array.from(new Set(siswa.map((s) => s.kelas).filter(Boolean))).sort();
+  }, [siswa]);
   const [profilSekolah, setProfilSekolah] = useState<ProfilSekolah>(() =>
     loadStorage<ProfilSekolah>('profilSekolah', INITIAL_SEKOLAH)
   );

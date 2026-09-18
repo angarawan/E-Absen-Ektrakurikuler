@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { School, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
 
 export const LoginView: React.FC = () => {
-  const { login, users, profilSekolah } = useApp();
+  const { login, users, profilSekolah, isDarkMode } = useApp();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -31,20 +31,38 @@ export const LoginView: React.FC = () => {
     setErrorMessage('');
   };
 
+  const cinematicBgClass = isDarkMode
+    ? `cinema-${profilSekolah.temaSinematik || 'midnight'}`
+    : 'cinema-light';
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-950 font-sans">
-      <div className="w-full max-w-md">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${cinematicBgClass} font-sans relative overflow-hidden`}>
+      {/* Cinematic Ambient Glow Orb */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-500/10 dark:bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Brand Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-xl">
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-8 shadow-2xl">
           {/* Logo & Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 mb-4">
-              <School className="w-8 h-8" />
-            </div>
+            {profilSekolah.logoUrl ? (
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white dark:bg-slate-800 p-2 shadow-xl border border-slate-200/80 dark:border-slate-700/80 mb-4 ring-4 ring-blue-500/10">
+                <img
+                  src={profilSekolah.logoUrl}
+                  alt="Logo Sekolah"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 mb-4">
+                <School className="w-8 h-8" />
+              </div>
+            )}
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               ABSENSI EKSTRAKURIKULER
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
               {profilSekolah.namaSekolah}
             </p>
           </div>
@@ -114,68 +132,6 @@ export const LoginView: React.FC = () => {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Demo Credentials */}
-          <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-            <p className="text-[11px] uppercase font-bold text-slate-400 mb-2 tracking-wider text-center">
-              Pilih Akun Demo (1-Click Login)
-            </p>
-            <p className="text-[11px] text-slate-500 text-center mb-3">
-              Akun murid dibuatkan oleh guru pembina. Silakan pilih role:
-            </p>
-            <div className="space-y-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('admin');
-                  setPassword('admin123');
-                }}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-left flex items-center justify-between text-xs transition-colors"
-              >
-                <div>
-                  <span className="font-bold text-slate-900 dark:text-white">admin</span>
-                  <span className="text-slate-400 block text-[10px]">Pass: admin123 (Administrator Sekolah)</span>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-[10px]">
-                  ADMIN
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('pembina');
-                  setPassword('pembina123');
-                }}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-left flex items-center justify-between text-xs transition-colors"
-              >
-                <div>
-                  <span className="font-bold text-slate-900 dark:text-white">pembina</span>
-                  <span className="text-slate-400 block text-[10px]">Pass: pembina123 (Guru Pembina Pramuka)</span>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-[10px]">
-                  GURU
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('siswa');
-                  setPassword('siswa123');
-                }}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 text-left flex items-center justify-between text-xs transition-colors"
-              >
-                <div>
-                  <span className="font-bold text-slate-900 dark:text-white">siswa</span>
-                  <span className="text-slate-400 block text-[10px]">Pass: siswa123 (Murid / Siswa)</span>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-[10px]">
-                  MURID
-                </span>
-              </button>
-            </div>
-          </div>
         </div>
 
         <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-6">
