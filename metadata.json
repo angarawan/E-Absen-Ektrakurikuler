@@ -1,0 +1,6 @@
+{
+  "name": "ABSENSI EKSTRAKURIKULER SEKOLAH",
+  "description": "Aplikasi pencatatan dan rekapitulasi kehadiran siswa dalam kegiatan ekstrakurikuler sekolah.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
