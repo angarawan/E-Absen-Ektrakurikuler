@@ -25,6 +25,7 @@ import {
 
 export interface Toast {
   id: string;
+  title?: string;
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
 }
@@ -46,7 +47,7 @@ interface AppContextType {
 
   // Toasts
   toasts: Toast[];
-  addToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
+  addToast: (message: string, type?: 'success' | 'error' | 'info' | 'warning', title?: string) => void;
   removeToast: (id: string) => void;
 
   // Data Collections
@@ -180,12 +181,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
 
   // Toast functions
-  const addToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+  const addToast = (
+    message: string,
+    type: 'success' | 'error' | 'info' | 'warning' = 'info',
+    title?: string
+  ) => {
     const id = Date.now().toString() + Math.random().toString(36).substring(2, 5);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, title, message, type }]);
     setTimeout(() => {
       removeToast(id);
-    }, 4000);
+    }, 4500);
   };
 
   const removeToast = (id: string) => {

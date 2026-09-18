@@ -40,6 +40,7 @@ export const AbsensiFormView: React.FC = () => {
     getAttendanceForDateAndEkskul,
     saveBatchAbsensi,
     setCurrentMenu,
+    addToast,
   } = useApp();
 
   const isPembina = currentUser?.role === 'PEMBINA';
@@ -73,6 +74,11 @@ export const AbsensiFormView: React.FC = () => {
   const [alreadyExists, setAlreadyExists] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
+  const [lastMarkedFeedback, setLastMarkedFeedback] = useState<{
+    nama: string;
+    status: AttendanceStatus;
+    waktu: string;
+  } | null>(null);
 
   // When ekskul or date changes, populate students and check duplicates
   useEffect(() => {
@@ -124,12 +130,31 @@ export const AbsensiFormView: React.FC = () => {
     }
   }, [selectedEkskulId, selectedTanggal, anggota, siswa]);
 
-  // Handle status toggle for a specific row
+  // Handle status toggle for a specific row with instant feedback
   const handleStatusChange = (siswaId: string, status: AttendanceStatus) => {
+    const student = siswa.find((s) => s.id === siswaId);
     setAttendanceRows((prev) =>
       prev.map((r) => (r.siswaId === siswaId ? { ...r, status } : r))
     );
     setSaveSuccessNotice(false);
+
+    if (student) {
+      const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLastMarkedFeedback({
+        nama: student.nama,
+        status,
+        waktu: nowTime,
+      });
+
+      // Quick toast feedback for immediate response
+      const statusLabel = {
+        HADIR: 'Hadir',
+        IZIN: 'Izin',
+        SAKIT: 'Sakit',
+        ALPA: 'Alpa',
+      }[status];
+      addToast(`${student.nama} ditandai: ${statusLabel}`, status === 'HADIR' ? 'success' : 'info');
+    }
   };
 
   // Handle keterangan change
@@ -150,17 +175,18 @@ export const AbsensiFormView: React.FC = () => {
       }))
     );
     setSaveSuccessNotice(false);
+    addToast('Semua siswa diset status HADIR.', 'info');
   };
 
   // Save attendance
   const handleSave = (allowOverwrite = false) => {
     if (!selectedEkskulId || !selectedTanggal) {
-      alert('Pilih ekstrakurikuler dan tanggal terlebih dahulu!');
+      addToast('Pilih ekstrakurikuler dan tanggal terlebih dahulu!', 'warning');
       return;
     }
 
     if (attendanceRows.length === 0) {
-      alert('Tidak ada siswa anggota yang terdaftar pada ekstrakurikuler ini.');
+      addToast('Tidak ada siswa anggota yang terdaftar pada kegiatan ini.', 'warning');
       return;
     }
 
@@ -179,9 +205,10 @@ export const AbsensiFormView: React.FC = () => {
     if (result.success) {
       setAlreadyExists(true);
       setSaveSuccessNotice(true);
-      setTimeout(() => setSaveSuccessNotice(false), 5000);
+      setLastMarkedFeedback(null);
+      setTimeout(() => setSaveSuccessNotice(false), 8000);
     } else {
-      alert(result.message);
+      addToast(result.message, 'error');
     }
   };
 
@@ -317,20 +344,65 @@ export const AbsensiFormView: React.FC = () => {
         )}
       </div>
 
-      {/* Save Success Notice */}
+      {/* Save Success Notice Banner with Instant Feedback */}
       {saveSuccessNotice && (
-        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 flex items-center justify-between gap-3 shadow-xs animate-in fade-in duration-200">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <p className="text-xs sm:text-sm font-bold">
-              Absensi berhasil disimpan! Data kehadiran telah dicatat ke dalam rekapitulasi sekolah.
+        <div
+          id="banner-sukses-absensi"
+          className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 dark:from-emerald-950/60 dark:to-teal-950/60 border-2 border-emerald-500 dark:border-emerald-600 text-emerald-950 dark:text-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg backdrop-blur-xs animate-in slide-in-from-top-3 duration-300"
+        >
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-600/30">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm sm:text-base font-black text-emerald-950 dark:text-emerald-200">
+                  Absensi Berhasil Disimpan!
+                </h4>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                  Terverifikasi
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 mt-0.5 font-medium">
+                Data kehadiran <strong>{attendanceRows.length} siswa</strong> ({countHadir} Hadir, {countIzin} Izin, {countSakit} Sakit, {countAlpa} Alpa) untuk kegiatan <strong>{selectedEkskulObj?.nama}</strong> pada tanggal <strong>{selectedTanggal}</strong> telah berhasil dicatat ke sistem.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="btn-tutup-banner-sukses"
+            onClick={() => setSaveSuccessNotice(false)}
+            className="self-end sm:self-center px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shrink-0 shadow-xs"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
+      {/* Instant Micro-Feedback Banner when student attendance button is clicked */}
+      {lastMarkedFeedback && !saveSuccessNotice && (
+        <div
+          id="banner-feedback-siswa-instan"
+          className="p-3.5 rounded-2xl bg-blue-50/90 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900/60 text-blue-950 dark:text-blue-100 flex items-center justify-between gap-3 shadow-xs animate-in slide-in-from-top-2 duration-200"
+        >
+          <div className="flex items-center gap-2.5">
+            <UserCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <p className="text-xs sm:text-sm font-semibold">
+              Feedback Instan: Kehadiran <strong className="text-blue-700 dark:text-blue-300">{lastMarkedFeedback.nama}</strong> berhasil diset ke status{' '}
+              <span className="inline-block px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-600 text-white ml-1">
+                {lastMarkedFeedback.status}
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 ml-2">
+                (Pukul {lastMarkedFeedback.waktu} WIB)
+              </span>
             </p>
           </div>
           <button
-            onClick={() => setSaveSuccessNotice(false)}
-            className="text-xs font-bold underline text-emerald-700 dark:text-emerald-300"
+            type="button"
+            onClick={() => setLastMarkedFeedback(null)}
+            className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
           >
-            Tutup
+            ✕
           </button>
         </div>
       )}

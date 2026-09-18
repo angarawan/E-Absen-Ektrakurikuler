@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { AttendanceStatus } from '../../types';
 import {
   Award,
   Calendar,
@@ -11,6 +12,9 @@ import {
   User as UserIcon,
   Phone,
   BookmarkCheck,
+  Send,
+  Sparkles,
+  Info,
 } from 'lucide-react';
 import { StatusBadge } from '../common/Badge';
 
@@ -22,6 +26,8 @@ export const DashboardSiswa: React.FC = () => {
     anggota,
     absensi,
     jadwal,
+    addToast,
+    saveBatchAbsensi,
   } = useApp();
 
   // Find linked siswa
@@ -35,6 +41,29 @@ export const DashboardSiswa: React.FC = () => {
   );
   const myEkskulIds = myAnggota.map((a) => a.ekskulId);
   const myEkskuls = ekskul.filter((e) => myEkskulIds.includes(e.id));
+
+  // State for Presensi Mandiri Siswa
+  const [selectedPresensiEkskulId, setSelectedPresensiEkskulId] = useState<string>(
+    () => myEkskuls[0]?.id || ''
+  );
+  const [presensiStatus, setPresensiStatus] = useState<AttendanceStatus>('HADIR');
+  const [presensiKeterangan, setPresensiKeterangan] = useState<string>('');
+  const [isSubmittingPresensi, setIsSubmittingPresensi] = useState<boolean>(false);
+  const [presensiFeedbackBanner, setPresensiFeedbackBanner] = useState<{
+    ekskulNama: string;
+    status: AttendanceStatus;
+    tanggal: string;
+    waktu: string;
+  } | null>(null);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const activePresensiEkskulId = selectedPresensiEkskulId || myEkskuls[0]?.id || '';
+  const currentEkskulObj = ekskul.find((e) => e.id === activePresensiEkskulId);
+
+  // Check if today already attended for selected ekskul
+  const todayRecord = absensi.find(
+    (a) => a.siswaId === mySiswa.id && a.ekskulId === activePresensiEkskulId && a.tanggal === todayStr
+  );
 
   // My attendance records
   const myAbsensi = absensi
@@ -57,6 +86,55 @@ export const DashboardSiswa: React.FC = () => {
     return ekskul.find((e) => e.id === id)?.nama || 'Kegiatan';
   };
 
+  // Handle student self-attendance submission
+  const handleLaporPresensi = () => {
+    if (!activePresensiEkskulId) {
+      addToast('Anda belum terdaftar pada ekstrakurikuler manapun.', 'warning');
+      return;
+    }
+
+    setIsSubmittingPresensi(true);
+
+    const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const ketText = presensiKeterangan.trim() || (presensiStatus === 'HADIR' ? 'Presensi Mandiri Siswa' : '-');
+
+    const result = saveBatchAbsensi(
+      activePresensiEkskulId,
+      todayStr,
+      [{ siswaId: mySiswa.id, status: presensiStatus, keterangan: ketText }],
+      true
+    );
+
+    setIsSubmittingPresensi(false);
+
+    if (result.success) {
+      const ekskulName = currentEkskulObj?.nama || 'Ekstrakurikuler';
+      // Set feedback banner
+      setPresensiFeedbackBanner({
+        ekskulNama: ekskulName,
+        status: presensiStatus,
+        tanggal: todayStr,
+        waktu: nowTime,
+      });
+
+      // Show instant toast notification
+      const statusLabel = {
+        HADIR: 'Hadir',
+        IZIN: 'Izin',
+        SAKIT: 'Sakit',
+        ALPA: 'Alpa',
+      }[presensiStatus];
+
+      addToast(
+        `Absensi berhasil! Kehadiran Anda dicatat sebagai "${statusLabel}" untuk kegiatan ${ekskulName}.`,
+        'success',
+        'Presensi Berhasil'
+      );
+    } else {
+      addToast(result.message, 'error');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Student Account Notice */}
@@ -68,6 +146,42 @@ export const DashboardSiswa: React.FC = () => {
           </span>
         </div>
       </div>
+
+      {/* Instant Feedback Banner when Attendance is successfully submitted */}
+      {presensiFeedbackBanner && (
+        <div
+          id="banner-sukses-presensi-siswa"
+          className="p-5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15 dark:from-emerald-950/70 dark:to-teal-950/70 border-2 border-emerald-500 text-emerald-950 dark:text-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-xs animate-in slide-in-from-top-3 duration-300"
+        >
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-600/30">
+              <CheckCircle2 className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-base font-black text-emerald-950 dark:text-emerald-200">
+                  Presensi Berhasil Dilakukan!
+                </h4>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xs">
+                  {presensiFeedbackBanner.status}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 mt-1 font-medium">
+                Halo <strong>{mySiswa.nama}</strong>, Anda telah berhasil melakukan presensi untuk kegiatan{' '}
+                <strong>{presensiFeedbackBanner.ekskulNama}</strong> pada hari ini (<strong>{presensiFeedbackBanner.tanggal}</strong>, pukul {presensiFeedbackBanner.waktu} WIB). Data kehadiran langsung tersimpan ke rekapitulasi sekolah.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="btn-tutup-feedback-presensi"
+            onClick={() => setPresensiFeedbackBanner(null)}
+            className="self-end sm:self-center px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shrink-0 shadow-xs"
+          >
+            Selesai
+          </button>
+        </div>
+      )}
 
       {/* Student Profile Card (Requirement 13) */}
       <div
@@ -107,6 +221,155 @@ export const DashboardSiswa: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Widget Presensi Mandiri Siswa Hari Ini */}
+      {myEkskuls.length > 0 && (
+        <div
+          id="card-presensi-mandiri"
+          className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                  Presensi Mandiri Siswa Hari Ini
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Lakukan absensi langsung untuk sesi latihan kegiatan ekstrakurikuler hari ini ({todayStr})
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Ekskul Selector if multiple */}
+            {myEkskuls.length > 1 && (
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  Pilih Ekskul:
+                </label>
+                <select
+                  id="select-ekskul-presensi"
+                  value={activePresensiEkskulId}
+                  onChange={(e) => setSelectedPresensiEkskulId(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-100"
+                >
+                  {myEkskuls.map((ek) => (
+                    <option key={ek.id} value={ek.id}>
+                      {ek.nama}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          {todayRecord ? (
+            /* Already checked in today */
+            <div className="mt-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <div>
+                  <h5 className="text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                    Anda sudah berhasil melakukan absensi hari ini!
+                  </h5>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5">
+                    Kegiatan: <strong>{currentEkskulObj?.nama}</strong> • Status:{' '}
+                    <strong className="uppercase">{todayRecord.status}</strong>{' '}
+                    {todayRecord.keterangan ? `(${todayRecord.keterangan})` : ''}
+                  </p>
+                </div>
+              </div>
+              <StatusBadge status={todayRecord.status} size="sm" />
+            </div>
+          ) : (
+            /* Not yet checked in - Show attendance action */
+            <div className="mt-4 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Kegiatan Terpilih:
+                  </span>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                    {currentEkskulObj?.nama} ({currentEkskulObj?.hari}, {currentEkskulObj?.jam})
+                  </p>
+                </div>
+
+                {/* Status Selection Buttons */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPresensiStatus('HADIR')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      presensiStatus === 'HADIR'
+                        ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-600/30'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 hover:text-emerald-700'
+                    }`}
+                  >
+                    Hadir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPresensiStatus('IZIN')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      presensiStatus === 'IZIN'
+                        ? 'bg-sky-600 text-white shadow-xs ring-2 ring-sky-600/30'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-sky-50 hover:text-sky-700'
+                    }`}
+                  >
+                    Izin
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPresensiStatus('SAKIT')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      presensiStatus === 'SAKIT'
+                        ? 'bg-amber-600 text-white shadow-xs ring-2 ring-amber-600/30'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-amber-50 hover:text-amber-700'
+                    }`}
+                  >
+                    Sakit
+                  </button>
+                </div>
+              </div>
+
+              {/* Optional note if not HADIR */}
+              {presensiStatus !== 'HADIR' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                    Alasan / Keterangan {presensiStatus}:
+                  </label>
+                  <input
+                    type="text"
+                    value={presensiKeterangan}
+                    onChange={(e) => setPresensiKeterangan(e.target.value)}
+                    placeholder={
+                      presensiStatus === 'SAKIT'
+                        ? 'Contoh: Demam flu / beristirahat di rumah'
+                        : 'Contoh: Ada keperluan keluarga mendesak'
+                    }
+                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  id="btn-kirim-presensi-siswa"
+                  onClick={handleLaporPresensi}
+                  disabled={isSubmittingPresensi}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{isSubmittingPresensi ? 'Memproses...' : 'Catat Kehadiran Saya Sekarang'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 6 Statistics Cards (Requirement 13: Total Ekstrakurikuler, Total Pertemuan, Hadir, Izin, Sakit, Alpa) */}
       <div>
